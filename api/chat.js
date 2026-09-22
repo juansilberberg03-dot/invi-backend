@@ -1,28 +1,19 @@
 // api/chat.js
 // Backend seguro para el chat INVI — pensado para desplegar en Vercel (gratis para este volumen).
 // La clave de la API de Anthropic vive SOLO aquí, nunca en el HTML público.
-//
-// PASOS PARA PONERLO EN MARCHA:
-// 1. Crea una cuenta en vercel.com (gratis) y en console.anthropic.com (para tu clave de API).
-// 2. Sube esta carpeta a un repositorio de GitHub, o instala Vercel CLI y ejecuta "vercel" dentro de ella.
-// 3. En el panel de Vercel del proyecto, ve a Settings → Environment Variables y añade:
-//      ANTHROPIC_API_KEY = tu_clave_real_aqui
-// 4. Vercel te da una URL, por ejemplo: https://invictum-invi.vercel.app
-// 5. En invictum-ortho.html, busca la función initChat() y cambia la llamada a
-//    "https://api.anthropic.com/v1/messages" por "https://invictum-invi.vercel.app/api/chat"
-//    (te dejo el bloque exacto a sustituir en INSTRUCCIONES.md).
 
 export default async function handler(req, res) {
-  // Solo aceptar peticiones POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
-
-  // Limitar quién puede llamar a este endpoint (pon aquí tu dominio real cuando lo tengas)
+  // Cabeceras CORS primero de todo, para que la petición previa (OPTIONS) del
+  // navegador no se rechace antes de llegar a comprobar el método.
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // Solo aceptar peticiones POST reales
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método no permitido' });
+  }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
